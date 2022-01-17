@@ -1,0 +1,184 @@
+---
+title: "HW1"
+author: "Edward Zhang"
+date: "1/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=4)
+options(scipen = 0, digits = 3)  # controls base R output
+if(!require('pacman')) {
+  install.packages('pacman')
+}
+pacman::p_load(ggplot2, dplyr, tidyverse, gridExtra, ggrepel, plotly, skimr, tidytext) 
+# install a package if it does not exist already and put the package in the path (library)
+# dplyr, ggplot2,tidyr
+```
+
+## Case 1: Audience Size
+### 2.1 Data Preparation
+#### i. Selecting variables of Interest
+```{r Data Cleaning}
+surveyResults <- read.csv('Survey_results_final.csv')
+filtered <- surveyResults[, c(28, 29, 30, 31, 32, 33, 10)]
+newNames <- c('age', 'gender', 'education', 'income', 'sirius', 'wharton', 
+              'worktime')
+
+for (idx in 1:7){
+  names(filtered)[idx] <- newNames[idx]
+}
+
+realGender <- filtered[, 'education']
+realEdu <- filtered[, 'gender']
+
+filtered[, 'education'] <- realEdu
+filtered[, 'gender'] <- realGender
+```
+
+#### ii. Handling incorrectly filled data
+The initial dataset seemed to have education and gender values that were 
+swapped. This was resolved by simply swapping their values.
+
+```{r Inspection}
+  cnt <- 1
+  for (elt in filtered$wharton){
+    if (elt == "Yes"){
+      filtered[cnt, "sirius"] <- "Yes"
+    }
+    cnt <- cnt + 1
+  }
+    
+```
+
+Furthermore, I went through all the affirmative answers for listening to
+Wharton and made sure that its corresponding response to listening to Sirius
+was also affirmative because Wharton's show is literally broadcast on the 
+Sirius channel.
+
+```{r Subset Confirmation}
+  filtered[1008, "age"] <- "18"
+  filtered[664, "age"] <- "22"
+  filtered[1535, "age"] <- "27"
+  filtered <- filtered[-c(886, 479, 663, 
+                          1018, 1251, 1261, 1386, 1643, 
+                          100, 497, 764, 784, 963,
+                          261, 559, 578,
+                          856, 1481),]
+  
+  filtered$age <- as.numeric(filtered$age)
+```
+
+The column of Age appears to be a character string which does not really make
+any sense. In sorting it, we find that there are 4 incorrect entries. Since
+there are a total of 1764 data points to work with, I will simply tossed out 
+two of those bad entries and corrected the other two
+(eighteen(18) -> 18, 27' -> 27).
+
+Someone also reported to be 223, so I made then 22. Once that was done, I 
+converted that column into numerical typings.
+
+Looking at the gender results, six additional people left that field blank, so
+I removed them from the dataset.
+
+Looking at education results, a couple people didn't actually select an option,
+but we'll keep that for now.
+
+Looking at income, five people left that field blank, so they were removed.
+
+Looking at sirius listenership, three people left it blank. Since they also did
+not listen to wharton, we cannot be sure if they listened to sirius or not. Thus
+they were removed as well.
+
+Looking at wharton's listenership, two people left it blank, and based on their
+sirius listenership, we cannot determine whether or not they listened to wharton
+or not.
+
+There were no issues with the worktime field as that is processed by MTurk.
+
+#### iii. Summary
+
+```{R Misc, echo = FALSE}
+  summary(filtered)
+  
+  age <- filtered$age
+  hist(age)
+  
+  generatePChart <- function(list, title){
+      list <- sort(list) 
+    
+      boxCnts <- c()
+      boxes <- c()
+      prev <- list[1]
+      currBoxCnt <- 0
+      for (x in list){
+        if (prev == x){
+          currBoxCnt <- currBoxCnt + 1
+        } else {
+          boxCnts <- append(boxCnts, currBoxCnt)
+          boxes <- append(boxes, prev)
+          currBoxCnt <- 1
+          prev <- x
+       }
+      }
+    
+    boxCnts <- append(boxCnts, currBoxCnt)
+    boxes <- append(boxes, prev)
+    
+    lbls <- boxes
+    pct <- round(boxCnts/sum(boxCnts)*100)
+    lbls <- paste(lbls, pct) # add percents to labels
+    lbls <- paste(lbls,"%",sep="") # ad % to labels
+    pie(boxCnts, labels = lbls, main= title)
+  }
+  
+  generateBChart <- function(list, title){
+      list <- sort(list) 
+    
+      boxCnts <- c()
+      boxes <- c()
+      prev <- list[1]
+      currBoxCnt <- 0
+      for (x in list){
+        if (prev == x){
+          currBoxCnt <- currBoxCnt + 1
+        } else {
+          boxCnts <- append(boxCnts, currBoxCnt)
+          boxes <- append(boxes, prev)
+          currBoxCnt <- 1
+          prev <- x
+       }
+      }
+    
+    boxCnts <- append(boxCnts, currBoxCnt)
+    boxes <- append(boxes, prev)
+    
+    df <- data.frame(
+      categories = boxes,
+      value = boxCnts
+    )
+    
+    ggplot(df, aes(x=categories, y=value)) + 
+    geom_bar(stat = "identity")
+  }
+  
+  
+  generatePChart(filtered$gender, "Gender Breakdown")
+  generateBChart(filtered$education, "Education Breakdown")
+  generateBChart(filtered$income, "Income Breakdown")
+  generatePChart(filtered$sirius, "Sirius Breakdown")
+  generatePChart(filtered$wharton, "Wharton Breakdown")
+  
+  
+```
+&nbsp; 
+
+The respondants to this survey seem to consist of mainly young people with
+low to moderate levels of income. There are slightly more men than women that
+responded, and very few people that responded had any education beyond that of
+a Bachelor's degree. This generally paints our pool of respondents as mostly
+college aged students and young adults in the process of transitioning into the
+workforce.
+
+
+
