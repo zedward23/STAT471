@@ -194,7 +194,7 @@ payroll <- datapay %>%   # first create variable: payroll and year
                names_to = "year", 
                names_prefix = "p",
                values_to = "payroll")
-payroll[1:3, 1:3] # show a few rows
+payroll[1:30, 1:3] # show a few rows
 
 win_num <- datapay %>%  # create variable: win_num and year
   select(team, X1998:X2014) %>% 
@@ -202,7 +202,7 @@ win_num <- datapay %>%  # create variable: win_num and year
                names_to = "year", 
                names_prefix = "X",
                values_to = "win_num")
-#win_num[1:3, 1:3]
+win_num[1:3, 1:3]
 
 win_pct <- datapay %>%  # create variable: win_pct and year
   select(team, X1998.pct:X2014.pct) %>% 
@@ -211,7 +211,7 @@ win_pct <- datapay %>%  # create variable: win_pct and year
                names_prefix = "X", 
                values_to = "win_pct") %>%
   mutate(year = substr(year, 1, 4))
-#win_pct[1:3, 1:3]
+win_pct[1:3, 1:3]
 
 # join tables into team, year, payrow, win_num, win_pct
 datapay_long <- payroll %>% 

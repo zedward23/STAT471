@@ -164,10 +164,9 @@ There were no issues with the worktime field as that is processed by MTurk.
   
   
   generatePChart(filtered$gender, "Gender Breakdown")
-  generateBChart(filtered$education, "Education Breakdown")
-  generateBChart(filtered$income, "Income Breakdown")
-  generatePChart(filtered$sirius, "Sirius Breakdown")
-  generatePChart(filtered$wharton, "Wharton Breakdown")
+  generatePChart(filtered$education, "Education Breakdown")
+  generatePChart(filtered$income, "Income Breakdown")
+
   
   
 ```
@@ -179,6 +178,145 @@ responded, and very few people that responded had any education beyond that of
 a Bachelor's degree. This generally paints our pool of respondents as mostly
 college aged students and young adults in the process of transitioning into the
 workforce.
+
+
+### 2.2 Sample Properties
+#### Comparison to General US Population
+50.8% of the US population is female which contrasts with the 58 - 42 Male -
+Female split shown in our sample pool. Our sample is much younger than the 
+US population at large, with a major under representation of the 60-69 year old
+population in favor of the 20 to 40 year old portion of the population. 
+
+However, within that 20-40 year old portion of our sample size (in which the 
+majority of our respondents came from), our sample reflects the educational 
+levels of the general US populace as of 2019 with a slight over representation 
+within the grouping of holders or graduate/professional degrees.
+
+In terms of income, our MTurk sample averages a lower general income level 
+compared to the percentage distribution of household income in the US as of 
+2020, with only 3% of our sample making over 150K per year where as over 18% of 
+American households make 150K or more per year. This discrepancy can likely be 
+explained by the notion that people with lower levels of income would be more 
+predisposed to embrace gig work like that of MTurk.
+
+Thus, our sample is not a perfect representation of the general US population. 
+More-so, our sample more specifically reflects a more educated and male, but lower
+income portion of the US population.
+
+#### Comparison to the MTurk Population
+MTurk's userbase skews even more female than the general US population, with 
+roughly 58% of its userbase being female, clashing even more with our sample's 
+male majority. However, in terms of age, our sample is much more in line with
+the distribution of MTurker ages, though our sample remains slightly younger than
+MTurk as a whole.  
+
+In terms of education, MTurk's general education level is fairly well reflected
+in the education levels of the our sample, with roughly 91% of the general MTurk
+population having had at least some college experience as opposed to the 88% 
+found in our research sample.
+
+Regarding income, our sample's income levels reflect the trends found in the 
+general MTurk population very well, though it still under performs MTurk by a 
+little. This might coincide with the fact that our sample was generally younger
+than the overall MTurk population.
+
+Overall, our sample is much more reflective of the MTurk population than it is 
+of the general US population, to the point where it might even be within the 
+margin of error for being considered as a representative random sample of the 
+MTurk population. Though while it may be functionally equivalent to being a random
+sample of the MTurk population, it is likely that the pricing of this task was 
+what drove the general age and income of its respondents downward.
+
+Sources: 
+
+Hanson, Melanie. “Education Attainment Statistics” EducationData.org, November 22, 2021,
+https://educationdata.org/education-attainment-statistics
+
+“Mechancial Turkers: Young, Well-Educated and Frequent Users.” Pew Research Center: Internet, Science &amp; Tech, Pew Research Center, 30 May 2020, https://www.pewresearch.org/internet/2016/07/11/turkers-in-this-canvassing-young-well-educated-and-frequent-users/. 
+
+Moss, Aaron, and Leib Litman. “Demographics of People on Amazon Mechanical Turk.” CloudResearch, 10 Aug. 2020, https://www.cloudresearch.com/resources/blog/who-uses-amazon-mturk-2020-demographics/. 
+
+U.S. Census Bureau 2019. QuickFacts
+
+“U.S. Income Distribution 2019.” Statista, 21 Sept. 2021, 
+https://www.statista.com/statistics/203183/percentage-distribution-of-household-income-in-the-us/. 
+
+### 2.3 Final Estimate
+Since our previous 
+```{R Estimation}
+#There are are roughly 51.6 Million SiriusXM 
+#In order to listen to the Wharton show, one MUST be listening on SiriusXM
+#Thus, the percentage of SiriusXM listeners that listen to Wharton should be
+#our overall percentage.
+
+idx = 1
+
+yesCnt = 0
+noCnt = 0
+
+for (x in filtered$sirius){
+    if (x == "Yes"){
+      if (filtered$wharton[idx] == "Yes"){
+        yesCnt <- yesCnt + 1
+      } else {
+        noCnt <- noCnt + 1
+      }
+    }
+    idx <- idx + 1
+}
+
+listenerBreakdown <- c(yesCnt, noCnt)
+labels <- c("Listen to Wharton on Sirius", "Do not listen to Wharton on Sirius")
+
+pct <- round(listenerBreakdown/sum(listenerBreakdown)*100)
+labels <- paste(labels, pct) # add percents to labels
+labels <- paste(labels,"%",sep="") # ad % to labels
+pie(listenerBreakdown, labels = labels, main= "Proportion of Sirius Listeners that Listen to Wharton's Sirius Talkshow")
+
+.05 * 51.6
+
+```
+Based on our results, 5% of SiriusXM listeners listen to the Wharton show, 
+meaning that roughly 2.58 million people listen to Wharton's show.
+
+#### Executive Summary
+1. Goal of the study
+The goal of this study was to estimate the total number of people that listen to
+Wharton's SiriusXM talk show.
+
+2. Method used
+Data was collected by putting out a task on Amazon Mechanical Turk in which 
+people were first asked whether or not they listened to SiriusXM, and second 
+asked whether or not they listened Sirius Business Radio by Wharton. Turkers 
+were paid 10 cents to complete this task, but were prevented from doing it twice
+to ensure no duplicates. Given that the sample of respondents represented the MTurk platform at a whole
+fairly well, and that MTurk represented the US population fairly well, we estimated
+the percentage of SiriusXM listen to the Wharton Talk show would be reflective
+of the true percentage.
+
+3. Findings
+Based on our findings and after cleaning the data, we found that roughly 5% of
+the people in our sample that listened to SiriusXM also listened to Sirius
+Business Radio. Thus, we estimate that about 5% of the 51.6 million Sirius 
+XM listeners listen to the Wharton show.
+
+4. Limitations of the Study
+Due to the fact that our sample size is significantly younger in age and lower
+in terms of income than the general US public, it is possible that our results
+have been skewed towards the views of the younger, less experienced, and more
+educated population of America. Plus, the sample size simply may have been too
+small to account for random biases based on the MTurkers who would have decided
+to do this task for the 10 cents it offered.
+
+
+
+
+
+
+
+
+
+
 
 
 
